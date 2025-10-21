@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.EvaluationMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into evaluation(user_id,order_id,number,phone,consignee,content,score,create_time,is_reply)
+        values(#{userId},#{orderId},#{number},#{phone},#{consignee},#{content},#{score},#{createTime},#{isReply})
+    </insert>
+    <select id="pageQuery" resultType="com.milk.entity.Evaluation">
+        select * from evaluation
+        <where>
+            <if test="number != null and number!=''">
+                and number like concat('%',#{number},'%')
+            </if>
+            <if test="phone != null and phone!=''">
+                and phone like concat('%',#{phone},'%')
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="scoreList != null and scoreList.size > 0">
+                AND score IN
+                <foreach collection="scoreList" item="score" open="(" separator="," close=")">
+                    #{score}
+                </foreach>
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from evaluation
+        <where>
+            <if test="begin != null">
+                and create_time &gt; #{begin}
+            </if>
+            <if test="end != null">
+                and create_time &lt; #{end}
+            </if>
+            <if test="score != null">
+                <if test="score instanceof java.util.List">
+                    and score in
+                    <foreach collection="score" item="s" open="(" separator="," close=")">
+                        #{s}
+                    </foreach>
+                </if>
+                <if test="!(score instanceof java.util.List)">
+                    and score = #{score}
+                </if>
+            </if>
+        </where>
+    </select>
+    <select id="selectShopAllEvaluation" resultType="com.milk.entity.Evaluation">
+        SELECT DISTINCT e.*
+        FROM evaluation e
+        LEFT JOIN evaluation_image ei ON e.id = ei.evaluation_id
+        <where>
+            <if test="type != null and type != ''">
+                <choose>
+                    <when test="type == 'good'">
+                        AND e.score IN (4, 5)
+                    </when>
+                    <when test="type == 'bad'">
+                        AND e.score IN (1, 2)
+                    </when>
+                    <when test="type == 'hasImage'">
+                        AND ei.id IS NOT NULL
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ORDER BY e.create_time DESC
+    </select>
+    <select id="selectEvaluationCount" resultType="com.milk.vo.EvaluationCountVO">
+        SELECT
+                (SELECT COUNT(*) FROM evaluation) AS allCount,
+                (SELECT COUNT(*) FROM evaluation WHERE score IN (4,5)) AS goodCount,
+                (SELECT COUNT(*) FROM evaluation WHERE score IN (1,2)) AS badCount,
+                (SELECT COUNT(DISTINCT evaluation_id) FROM evaluation_image) AS hasImageCount
+    </select>
+
+</mapper>

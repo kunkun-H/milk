@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.EmployeeMapper">
+    <update id="update">
+        update employee
+        <set>
+            <if test="name!=null">name=#{name},</if>
+            <if test="username!=null">username=#{username},</if>
+            <if test="password!=null">password=#{password},</if>
+            <if test="phone!=null">phone=#{phone},</if>
+            <if test="sex!=null">sex=#{sex},</if>
+            <if test="idNumber!=null">id_number=#{idNumber},</if>
+            <if test="updateTime!=null">update_time=#{updateTime},</if>
+            <if test="updateUser!=null">update_user=#{updateUser},</if>
+            <if test="status!=null">status=#{status},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="pageQuery" resultType="com.milk.entity.Employee">
+        select * from employee
+        <where>
+            <if test="name!=null and name !='' ">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="phone!=null and phone !='' ">
+                and phone like concat('%',#{phone},'%')
+            </if>
+            <if test="status!=null">
+                and status =#{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="selectEmployeeById" resultType="com.milk.entity.Employee">
+        select * from employee
+        where id=#{id}
+    </select>
+</mapper>

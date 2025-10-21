@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.ChatMessageMapper">
+    <!-- 插入新消息 -->
+    <insert id="insert" parameterType="com.milk.entity.ChatMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_message (session_id, sender_id, receiver_id, content, content_type, is_read,create_time)
+        VALUES (#{sessionId}, #{senderId}, #{receiverId}, #{content}, #{contentType}, #{isRead},#{createTime})
+    </insert>
+
+    <!-- 查询指定会话的所有消息 -->
+    <select id="findBySessionId" parameterType="long" resultType="com.milk.entity.ChatMessage">
+        SELECT * FROM chat_message
+        WHERE session_id = #{sessionId}
+        ORDER BY send_time ASC
+    </select>
+    <select id="getAllMsg" resultType="com.milk.entity.ChatMessage">
+        SELECT * FROM chat_message
+        WHERE (sender_id = #{senderId} AND receiver_id = #{receiverId})
+           OR (sender_id = #{receiverId} AND receiver_id = #{senderId})
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 将未读消息标记为已读 -->
+    <update id="markAsRead" parameterType="map">
+        UPDATE chat_message
+        SET is_read = 1
+        WHERE session_id = #{sessionId}
+          AND receiver_id = #{receiverId}
+          AND is_read = 0
+    </update>
+</mapper>

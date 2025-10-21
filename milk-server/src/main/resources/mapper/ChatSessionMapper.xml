@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.ChatSessionMapper">
+    <!-- 新建会话 -->
+    <insert id="insert" parameterType="com.milk.entity.ChatSession" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_session (user_id, seller_id, last_message, last_time, unread_count,create_time,update_time)
+        VALUES (#{userId}, #{sellerId}, #{lastMessage}, #{lastTime}, #{unreadCount},#{createTime},#{updateTime})
+    </insert>
+
+    <!-- 更新会话（更新最后消息、时间、未读数） -->
+    <update id="update" parameterType="com.milk.entity.ChatSession">
+        UPDATE chat_session
+        SET
+            last_message = #{lastMessage},
+            last_time = #{lastTime},
+            unread_count = #{unreadCount},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据用户和商家查找会话 -->
+    <select id="findByUserAndSeller" parameterType="map" resultType="com.milk.entity.ChatSession">
+        SELECT * FROM chat_session
+        WHERE user_id = #{userId} AND seller_id = #{sellerId}
+            LIMIT 1
+    </select>
+
+    <!-- 查询某商家的所有会话（商家端左侧列表用） -->
+    <select id="findAllBySeller" resultType="com.milk.entity.ChatSession">
+        SELECT * FROM chat_session
+        WHERE seller_id = #{id}
+        ORDER BY last_time DESC
+    </select>
+
+
+
+</mapper>

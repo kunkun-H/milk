@@ -1,0 +1,64 @@
+server:
+  port: 8082
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${milk.datasource.driver-class-name}
+      url: jdbc:mysql://${milk.datasource.host}:${milk.datasource.port}/${milk.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${milk.datasource.username}
+      password: ${milk.datasource.password}
+  redis:
+    host: ${milk.redis.host}
+    port: ${milk.redis.port}
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.milk.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      sky:
+        mapper: debug
+        service: info
+        controller: info
+
+milk:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: keya
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    user-secret-key: keyu
+    user-ttl: 7200000
+    user-token-name: authentication
+  alioss:
+    access-key-id: ${milk.alioss.access-key-id}
+    endpoint: ${milk.alioss.endpoint}
+    access-key-secret: ${milk.alioss.access-key-secret}
+    bucket-name: ${milk.alioss.bucket-name}
+  wechat:
+    app-id: ${milk.wechat.app-id}
+    secret: ${milk.wechat.secret}
+    mchid: ${milk.wechat.mchid}
+    mchSerialNo: ${milk.wechat.mchSerialNo}
+    privateKeyFilePath: ${milk.wechat.privateKeyFilePath}
+    apiV3Key: ${milk.wechat.apiV3Key}
+    weChatPayCertFilePath: ${milk.wechat.weChatPayCertFilePath}
+    notifyUrl: ${milk.wechat.notifyUrl}
+    refundNotifyUrl: ${milk.wechat.refundNotifyUrl}
+  shop:
+    address: ${milk.shop.address}
+  baidu:
+    ak: ${milk.baidu.ak}

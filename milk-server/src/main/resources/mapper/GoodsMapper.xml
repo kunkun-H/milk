@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.milk.mapper.GoodsMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into goods(name,category_id,price,image,description,status,create_time,update_time,create_user,update_user)
+        values(#{name},#{categoryId},#{price},#{image},#{description},#{status},#{createTime},#{updateTime},#{createUser},#{updateUser})
+    </insert>
+    <update id="update">
+        update goods
+        <set>
+            <if test="name!=null">name=#{name},</if>
+            <if test="categoryId!=null">category_id=#{categoryId},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="updateTime!=null">update_time=#{updateTime},</if>
+            <if test="updateUser!=null">update_user=#{updateUser},</if>
+            <if test="image!=null">image=#{image},</if>
+            <if test="description!=null">description=#{description},</if>
+        </set>
+        where id=#{id}
+    </update>
+    <delete id="deleteBatchByIds">
+        delete from goods where id in
+        <foreach collection="ids" item="dId" separator="," open="(" close=")">
+            #{dId}
+        </foreach>
+    </delete>
+    <select id="page" resultType="com.milk.vo.GoodsVO">
+        select d.*,c.name as categoryName from goods d left join category c
+        on d.category_id=c.id
+        <where>
+            <if test="name!=null and name!=''">
+                and d.name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId!=null">
+                and category_id =#{categoryId}
+            </if>
+            <if test="status!=null">
+                and d.status =#{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="getById" resultType="com.milk.entity.Goods">
+        select * from goods
+        where id=#{id}
+    </select>
+    <select id="getListByCategoryId" resultType="com.milk.entity.Goods">
+        select * from goods
+        <where>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from goods
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.milk.mapper.GoodsFlavorMapper">
+
+    <insert id="insertBatch">
+        insert into goods_flavor(goods_id,name,value) values
+        <foreach collection="flavors" item="df" separator=",">
+            (#{df.goodsId},#{df.name},#{df.value})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByGoodsId">
+        delete from goods_flavor
+        where goods_id=#{goodsId}
+    </delete>
+    <delete id="deleteBatchByGoodsIds">
+        delete from goods_flavor where goods_id in
+        <foreach collection="ids" item="dId" separator="," open="(" close=")">
+            #{dId}
+        </foreach>
+    </delete>
+</mapper>
