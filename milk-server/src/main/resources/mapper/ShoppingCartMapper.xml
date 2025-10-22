@@ -4,34 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.milk.mapper.ShoppingCartMapper">
-    <insert id="insert">
-        insert into shopping_cart(name,image,user_id,goods_id,setmeal_id,goods_flavor,number,amount,create_time)
-        values (#{name},#{image},#{userId},#{goodsId},#{setmealId},#{goodsFlavor},#{number},#{amount},#{createTime})
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into shopping_cart(user_id,create_time)
+        values (#{userId},#{createTime})
     </insert>
-    <insert id="insertBatch">
-        insert into shopping_cart(name, image, user_id, goods_id, setmeal_id, goods_flavor, number, amount, create_time)
-        values
-        <foreach collection="list" item="item" separator=",">
-            (#{item.name}, #{item.image}, #{item.userId}, #{item.goodsId}, #{item.setmealId}, #{item.goodsFlavor}, #{item.number}, #{item.amount}, #{item.createTime})
-        </foreach>
-    </insert>
-
-
-    <select id="list" resultType="com.milk.entity.ShoppingCart">
-        select * from shopping_cart
-        <where>
-            <if test="userId!=null">
-                and user_id=#{userId}
-            </if>
-            <if test="goodsId!=null">
-                and goods_id=#{goodsId}
-            </if>
-            <if test="setmealId!=null">
-                and setmeal_id=#{setmealId}
-            </if>
-            <if test="goodsFlavor!=null">
-                and goods_flavor=#{goodsFlavor}
-            </if>
-        </where>
-    </select>
 </mapper>

@@ -72,6 +72,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Value("${milk.baidu.ak}")
     private String ak;
+    @Autowired
+    private CartItemMapper cartItemMapper;
 
     @Override
     @Transactional
@@ -87,9 +89,12 @@ public class OrderServiceImpl implements OrderService {
 
         //判断购物车是否有数据
         Long userId = BaseContext.getCurrentId();
-        ShoppingCart shoppingCart=new ShoppingCart();
-        shoppingCart.setUserId(userId);
-        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+        ShoppingCart shoppingCart = shoppingCartMapper.selectByUserId(userId);
+        CartItem cartItem=new CartItem();
+        if(shoppingCart!=null){
+            cartItem.setCartId(shoppingCart.getId());
+        }
+        List<CartItem> list = cartItemMapper.list(cartItem);
         if(list==null || list.size()==0){
             throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
@@ -130,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.insert(orders);
 
         List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
-        for(ShoppingCart cart:list){
+        for(CartItem cart:list){
             OrderDetail orderDetail=new OrderDetail();
             BeanUtils.copyProperties(cart,orderDetail);
             orderDetail.setOrderId(orders.getId());
@@ -138,8 +143,8 @@ public class OrderServiceImpl implements OrderService {
         }
         orderDetailMapper.insertBatch(orderDetails);
 
-        //清空购物车
-        shoppingCartMapper.delete(userId);
+        //清空购物车明细
+        cartItemMapper.delete(shoppingCart.getId());
 
         OrderSubmitVO orderSubmitVO=new OrderSubmitVO();
         orderSubmitVO.setId(orders.getId());
@@ -228,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
 //        JSONObject jsonObject = weChatPayUtil.pay(
 //                ordersPaymentDTO.getOrderNumber(), //商户订单号
 //                new BigDecimal(0.01), //支付金额，单位 元
-//                "苍穹外卖订单", //商品描述
+//                "外卖订单", //商品描述
 //                user.getOpenid() //微信用户的openid
 //        );
 //
@@ -389,15 +394,24 @@ public class OrderServiceImpl implements OrderService {
     public void repetition(Long id) {
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
         if(orderDetailList!=null && orderDetailList.size()>0){
-            List<ShoppingCart> list=new ArrayList<>();
-            for(OrderDetail o:orderDetailList){
-                ShoppingCart shoppingCart=new ShoppingCart();
-                BeanUtils.copyProperties(o,shoppingCart,"id");
-                shoppingCart.setUserId(BaseContext.getCurrentId());
-                shoppingCart.setCreateTime(LocalDateTime.now());
-                list.add(shoppingCart);
+            Long userId = BaseContext.getCurrentId();
+            ShoppingCart shoppingCart = shoppingCartMapper.selectByUserId(userId);
+            ShoppingCart cart=new ShoppingCart();
+            if(shoppingCart==null){
+                cart.setUserId(userId);
+                cart.setCreateTime(LocalDateTime.now());
+                shoppingCartMapper.insert(cart);
             }
-            shoppingCartMapper.insertBatch(list);
+            Long cartId=shoppingCart==null?cart.getId():shoppingCart.getId();
+            List<CartItem> list=new ArrayList<>();
+            for(OrderDetail o:orderDetailList){
+                CartItem cartItem=new CartItem();
+                BeanUtils.copyProperties(o,cartItem,"id");
+                cartItem.setCartId(cartId);
+                shoppingCart.setCreateTime(LocalDateTime.now());
+                list.add(cartItem);
+            }
+            cartItemMapper.insertBatch(list);
         }
     }
 

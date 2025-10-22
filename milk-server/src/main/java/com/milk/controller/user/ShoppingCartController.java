@@ -1,6 +1,7 @@
 package com.milk.controller.user;
 
 import com.milk.dto.ShoppingCartDTO;
+import com.milk.entity.CartItem;
 import com.milk.entity.ShoppingCart;
 import com.milk.result.Result;
 import com.milk.service.ShoppingCartService;
@@ -46,9 +47,9 @@ public class ShoppingCartController {
 
     @GetMapping("/list")
     @ApiOperation("查询购物车列表")
-    public Result<List<ShoppingCart>> list(){
+    public Result<List<CartItem>> list(){
         log.info("查询购物车列表");
-        List<ShoppingCart> shoppingCartList = shoppingCartService.getShoopingCart();
+        List<CartItem> shoppingCartList = shoppingCartService.getShoppingCart();
         return Result.success(shoppingCartList);
     }
 

@@ -1,6 +1,7 @@
 package com.milk.service;
 
 import com.milk.dto.ShoppingCartDTO;
+import com.milk.entity.CartItem;
 import com.milk.entity.ShoppingCart;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 public interface ShoppingCartService {
     void addShoppingCart(ShoppingCartDTO shoppingCartDTO);
 
-    List<ShoppingCart> getShoopingCart();
+    List<CartItem> getShoppingCart();
 
     void cleanShoppingCart();
 

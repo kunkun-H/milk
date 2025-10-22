@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.milk.mapper.CartItemMapper">
+    <insert id="insert">
+        insert into cart_item(cart_id,goods_id,setmeal_id,goods_flavor,number,name,image,amount,create_time)
+        values (#{cartId},#{goodsId},#{setmealId},#{goodsFlavor},#{number},#{name},#{image},#{amount},#{createTime})
+    </insert>
+    <insert id="insertBatch">
+        insert into cart_item(name, image, cart_id, goods_id, setmeal_id, goods_flavor, number, amount, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name}, #{item.image}, #{item.cartId}, #{item.goodsId}, #{item.setmealId}, #{item.goodsFlavor}, #{item.number}, #{item.amount}, #{item.createTime})
+        </foreach>
+    </insert>
+
+
+    <select id="list" resultType="com.milk.entity.CartItem">
+        select * from cart_item
+        <where>
+            <if test="cartId!=null">
+                and cart_id=#{cartId}
+            </if>
+            <if test="goodsId!=null">
+                and goods_id=#{goodsId}
+            </if>
+            <if test="setmealId!=null">
+                and setmeal_id=#{setmealId}
+            </if>
+            <if test="goodsFlavor!=null">
+                and goods_flavor=#{goodsFlavor}
+            </if>
+        </where>
+    </select>
+</mapper>
