@@ -1,7 +1,11 @@
 package com.milk.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -14,7 +18,11 @@ import java.time.LocalDateTime;
  * @Version 1.0
  */
 @Data
-public class EvaluationImage {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EvaluationImage implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Integer id;
     private Integer evaluationId;
     private String image;

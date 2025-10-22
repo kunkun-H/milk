@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.VoucherMapper">
+
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into seckill_voucher(stock,begin_time,end_time)
+        values (#{stock},#{beginTime},#{endTime})
+    </insert>
+    <update id="update">
+        UPDATE seckill_voucher
+        SET stock = stock - 1
+        WHERE id = #{voucherId} AND stock > 0
+    </update>
+</mapper>

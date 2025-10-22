@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessage implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private Long sessionId;
     private Long senderId;

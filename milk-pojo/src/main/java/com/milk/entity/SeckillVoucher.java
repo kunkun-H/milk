@@ -9,23 +9,24 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * ClassName: EvaluationReply
+ * ClassName: SeckillVoucher
  * Package: com.milk.entity
- * Description:
+ * Description:秒杀优惠券表
  *
  * @Author 何坤燃
- * @Create 2025/8/4 21:50
+ * @Create 2025/10/22 10:36
  * @Version 1.0
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EvaluationReply implements Serializable {
+public class SeckillVoucher implements Serializable {
     private static final long serialVersionUID = 1L;
-    private Integer id;
-    private Integer evaluationId;
-    private String replyContent;
-    private Long adminId;
-    private LocalDateTime replyTime;
+    private Long id;
+    private Integer stock;//库存
+    private LocalDateTime createTime;
+    private LocalDateTime beginTime;
+    private LocalDateTime endTime;
+    private LocalDateTime updateTime;
 }

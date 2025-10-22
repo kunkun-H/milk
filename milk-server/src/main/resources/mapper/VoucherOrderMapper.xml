@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.milk.mapper.VoucherOrderMapper">
+    <insert id="insert">
+        insert into voucher_order(id,user_id,voucher_id)
+        values (#{id},#{userId},#{voucherId})
+    </insert>
+
+    <select id="countByUserAndVoucher" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM voucher_order
+        WHERE user_id = #{userId}
+          AND voucher_id = #{voucherId}
+    </select>
+</mapper>
