@@ -30,6 +30,8 @@
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
+        <hutool>5.8.20</hutool>
+        <rabbitmq>3.3.4</rabbitmq>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -121,6 +123,16 @@
                 <groupId>com.github.wechatpay-apiv3</groupId>
                 <artifactId>wechatpay-apache-httpclient</artifactId>
                 <version>0.4.8</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-amqp</artifactId>
+                <version>${rabbitmq}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

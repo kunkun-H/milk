@@ -10,6 +10,6 @@ package com.milk.constant;
  * @Version 1.0
  */
 public class ParamsConstant {
-    public static final String SECKILL_STOCK_KEY="seckill_voucher_stock:";
+    public static final String SECKILL_STOCK_KEY="seckill_voucher:stock:";
     public  static final String KEY_PREFIX="lock:";
 }

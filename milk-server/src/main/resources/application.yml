@@ -15,6 +15,20 @@ spring:
   redis:
     host: ${milk.redis.host}
     port: ${milk.redis.port}
+  rabbitmq:
+    host: ${milk.rabbitmq.host}       # RabbitMQ 主机地址
+    port: ${milk.rabbitmq.port}             # 端口
+    username: ${milk.rabbitmq.username}        # 用户名
+    password: ${milk.rabbitmq.password}        # 密码
+    virtual-host: /        # 虚拟主机
+    publisher-confirm-type: correlated  # 开启消息发送确认机制（防丢）
+    publisher-returns: true             # 开启失败回退机制
+    listener:
+      simple:
+        acknowledge-mode: manual        # 手动确认消息
+        concurrency: 10                  # 消费者最小并发数
+        max-concurrency: 50             # 最大并发数
+        prefetch: 1                     # 每次只取一条消息
 
 mybatis:
   #mapper配置文件

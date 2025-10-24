@@ -1,5 +1,6 @@
 package com.milk.service.impl;
 
+import com.milk.constant.RabbitMQConstants;
 import com.milk.context.BaseContext;
 import com.milk.entity.SeckillVoucher;
 import com.milk.entity.VoucherOrder;
@@ -9,13 +10,21 @@ import com.milk.result.Result;
 import com.milk.service.VoucherOrderService;
 import com.milk.utils.RedisIdWorkerUtil;
 import com.milk.utils.RedisLockUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ClassName: VoucherOrderImpl
@@ -27,6 +36,7 @@ import java.time.LocalDateTime;
  * @Version 1.0
  */
 @Service
+@Slf4j
 public class VoucherOrderServiceImpl implements VoucherOrderService {
     @Autowired
     private VoucherMapper voucherMapper;
@@ -36,6 +46,14 @@ public class VoucherOrderServiceImpl implements VoucherOrderService {
     private RedisIdWorkerUtil redisIdWorkerUtil;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    private static final DefaultRedisScript<Long> SECKILL_SCRIPT;
+    static {
+        SECKILL_SCRIPT = new DefaultRedisScript<>();
+        SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
+        SECKILL_SCRIPT.setResultType(Long.class);
+    }
     @Override
     public Result seckillVoucher(Long voucherId) {
         // 1.查询优惠券
@@ -104,5 +122,66 @@ public class VoucherOrderServiceImpl implements VoucherOrderService {
         // 7.返回订单id
         return Result.success(orderId);
 
+    }
+
+    /**
+     * 秒杀优化：利用mq异步下单
+     * @param voucherId
+     * @return
+     */
+    public Result seckillVoucher1(Long voucherId) {
+        // 获取用户ID
+        Long userId = BaseContext.getCurrentId();
+        // 生成全局唯一订单ID
+        long orderId = redisIdWorkerUtil.nextId("order");
+
+        // 1. 执行 Lua 脚本（判断库存、是否重复下单）
+        Long result = stringRedisTemplate.execute(
+                SECKILL_SCRIPT,
+                Collections.emptyList(),
+                voucherId.toString(), userId.toString(), String.valueOf(orderId)
+        );
+
+        int r = result.intValue();
+        if (r != 0) {
+            return Result.error(r == 1 ? "库存不足" : "不能重复下单");
+        }
+
+        // 2. 构造消息体
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("userId", userId);
+        msg.put("voucherId", voucherId);
+        msg.put("orderId", orderId);
+
+        // 3. 发送消息到 MQ
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConstants.EXCHANGE_VOUCHER_ORDER,
+                    RabbitMQConstants.ROUTING_KEY_VOUCHER_ORDER,
+                    msg,
+                    message -> {
+                        // 设置消息ID，用于幂等追踪
+                        message.getMessageProperties().setMessageId(String.valueOf(orderId));
+                        return message;
+                    }
+            );
+            log.info("发送订单消息成功：orderId={}, userId={}, voucherId={}", orderId, userId, voucherId);
+        } catch (Exception e) {
+            log.error("发送订单消息失败：{}", e.getMessage(), e);
+            stringRedisTemplate.opsForValue().increment("seckill_voucher:stock:" + voucherId);
+            return Result.error("下单失败，请稍后重试");
+        }
+        // 4. 返回订单号
+        return Result.success(orderId);
+    }
+
+    @PostConstruct
+    public void initConfirmCallback() {
+        // 确认消息是否成功投递到交换机
+        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+            if (!ack) {
+                log.error("消息投递到交换机失败：{}", cause);
+            }
+        });
     }
 }
